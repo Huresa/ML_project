@@ -1,0 +1,7 @@
+beta	1
+n	30
+N	2
+time_step	0.1
+k_max	200
+k_lang	10
+epsilon	0.01
