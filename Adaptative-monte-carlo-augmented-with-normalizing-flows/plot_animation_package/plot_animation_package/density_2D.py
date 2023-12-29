@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
 
 
-def plot(beta, U, model_file, renormalization_flow, base_distribution):
+def plot(beta, U, energy_parameters, model_file, renormalization_flow, base_distribution):
 
     flow = renormalization_flow
     flow.load_state_dict(torch.load(model_file))
@@ -28,7 +28,7 @@ def plot(beta, U, model_file, renormalization_flow, base_distribution):
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
 
-    z_target = torch.exp(-beta*U(torch.stack([xx, yy])))
+    z_target = torch.exp(-beta*U(torch.stack([xx, yy]), energy_parameters))
     ax2.pcolormesh(xx.numpy(),yy.numpy(),z_target.numpy())
     ax2.set_title('Target distribution')
     ax2.set_xlabel('x')

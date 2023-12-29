@@ -5,3 +5,4 @@ time_step	0.1
 k_max	200
 k_lang	10
 epsilon	0.01
+energy parameters[]

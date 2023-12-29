@@ -1,6 +1,6 @@
 import torch
 
-def bistable_circle(configuration):
+def bistable_circle(configuration, energy_parameters):
     '''energy of the system for a given configuration'''
     x, y = configuration[0], configuration[1]
 
@@ -9,3 +9,7 @@ def bistable_circle(configuration):
     exp2 = torch.exp(-0.5 * ((x + 4) / 0.8) ** 2)
     
     return 0.5 * ((norm - 5) / 0.4) ** 2 - torch.log(exp1 + exp2)
+
+#boundary conditions
+def bistable_circle_BC(configuration):
+    return bistable_circle_BC

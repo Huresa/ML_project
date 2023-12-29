@@ -6,14 +6,14 @@ from tqdm import tqdm
 import torch.optim as optim
 from os import getcwd, makedirs
 
-def NF_MCMC_algorithm(model_name, beta, U, flow, initial_data, base_distribution, time_step, k_max, k_lang, epsilon):
+def NF_MCMC_algorithm(model_name, beta, U, BC, energy_parameters, flow, initial_data, base_distribution, time_step, k_max, k_lang, epsilon):
     #all operations must act on the whole array of lattices, hence proposed_model_configuration_amongst_zeros and other weird stuff
     
     path = getcwd()+'\\saved_models\\'+model_name
     makedirs(path)
 
     def gradU(configuration):
-        return autograd.grad(U(configuration), configuration)[0]
+        return autograd.grad(U(configuration, energy_parameters), configuration)[0]
 
     n, N = initial_data.shape
 
@@ -38,18 +38,22 @@ def NF_MCMC_algorithm(model_name, beta, U, flow, initial_data, base_distribution
                 history[k,i] += 2
                 proposed_model_configuration_amongst_zeros[k,i] = flow(base_distribution.sample())[0]
                 
+                proposed_model_configuration_amongst_zeros[k,i] = BC(proposed_model_configuration_amongst_zeros[k,i])
+
                 acceptance_rate = torch.exp(log_rho_hat(array_of_model_configurations[k-1,i])
                                             - log_rho_hat(proposed_model_configuration_amongst_zeros[k,i])
-                                            + beta*U(array_of_model_configurations[k-1, i])
-                                            - beta*U(proposed_model_configuration_amongst_zeros[k, i]))
+                                            + beta*U(array_of_model_configurations[k-1, i], energy_parameters)
+                                            - beta*U(proposed_model_configuration_amongst_zeros[k, i], energy_parameters))
 
             else:
                 proposed_model_configuration_amongst_zeros[k,i] = ( array_of_model_configurations[k-1,i]
                                                                     - time_step * gradU(array_of_model_configurations[k-1, i])
                                                                     + torch.sqrt(2*torch.tensor(time_step)) * normal_distribution_for_langevin.sample())
 
-                acceptance_rate = torch.exp(beta*U(array_of_model_configurations[k-1, i])
-                                            - beta*U(proposed_model_configuration_amongst_zeros[k, i]))
+                proposed_model_configuration_amongst_zeros[k,i] = BC(proposed_model_configuration_amongst_zeros[k,i])
+
+                acceptance_rate = torch.exp(beta*U(array_of_model_configurations[k-1, i], energy_parameters)
+                                            - beta*U(proposed_model_configuration_amongst_zeros[k, i], energy_parameters))
 
             if uniform() > acceptance_rate:
                     proposed_model_configuration_amongst_zeros[k,i] = array_of_model_configurations[k-1,i]
@@ -77,5 +81,7 @@ def NF_MCMC_algorithm(model_name, beta, U, flow, initial_data, base_distribution
         file.write(f"k_max\t{k_max}\n")
         file.write(f"k_lang\t{k_lang}\n")
         file.write(f"epsilon\t{epsilon}\n")
+        file.write("energy parameters\t")
+        file.write(str(energy_parameters))
     
     return history, array_of_model_configurations.detach()
