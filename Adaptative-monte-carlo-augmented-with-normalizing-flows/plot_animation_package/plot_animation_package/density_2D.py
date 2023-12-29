@@ -91,9 +91,3 @@ def animation(model_file, n, k_max, array_of_model_configurations, history):
 
     # Save the animation (optional)
     animation.save(model_file+'.gif', writer='imagemagick', fps=10)
-
-    # Display the animation (optional)
-    plt.show()
-
-    # Turn interactive mode back on if needed
-    plt.ion()
