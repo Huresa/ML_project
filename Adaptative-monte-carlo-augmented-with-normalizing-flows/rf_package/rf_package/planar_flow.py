@@ -45,7 +45,7 @@ class PlanarFlow(nn.Module):
 
 class LayeredPlanarFlow(nn.Module):
 
-    def __init__(self, data_dim, flow_length = 16):
+    def __init__(self, data_dim, flow_length = 16): #16 before
         super().__init__()
 
         self.layers = nn.Sequential(

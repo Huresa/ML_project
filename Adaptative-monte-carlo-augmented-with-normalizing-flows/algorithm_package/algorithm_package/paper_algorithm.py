@@ -70,9 +70,9 @@ def NF_MCMC_algorithm(model_name, beta, U, BC, energy_parameters, flow, initial_
         loss.backward()
         optimizer.step()
     
-    torch.save(flow.state_dict(), path+'\\'+model_name)
-    torch.save(array_of_model_configurations, path+'\\'+'array_of_model_configurations.pt')
-    torch.save(history, path+'\\'+'history.pt')
+    torch.save(flow.state_dict(), path+'\\model.pt')
+    torch.save(array_of_model_configurations, path+'\\array_of_model_configurations.pt')
+    torch.save(history, path+'\\history.pt')
 
     file_name = path+"\\parameters.txt"
     with open(file_name, 'w') as file:

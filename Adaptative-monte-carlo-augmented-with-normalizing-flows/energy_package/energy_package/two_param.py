@@ -12,4 +12,4 @@ def bistable_circle(configuration, energy_parameters):
 
 #boundary conditions
 def bistable_circle_BC(configuration):
-    return bistable_circle_BC
+    return configuration
