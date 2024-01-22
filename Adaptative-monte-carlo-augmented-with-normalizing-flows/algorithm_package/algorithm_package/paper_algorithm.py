@@ -46,9 +46,16 @@ def NF_MCMC_algorithm(model_name, beta, U, BC, energy_parameters, flow, initial_
                                             - beta*U(proposed_model_configuration_amongst_zeros[k, i], energy_parameters))
 
             else:
+                alpha = torch.randint(0,10, (1,)).numpy()[0]
+                theta = torch.randn(1)*2*torch.pi
+                add_spin = torch.zeros(N)
+                add_spin[alpha] = theta - array_of_model_configurations[k-1,i,alpha]
+
+
                 proposed_model_configuration_amongst_zeros[k,i] = ( array_of_model_configurations[k-1,i]
-                                                                    - time_step * gradU(array_of_model_configurations[k-1, i])
-                                                                    + torch.sqrt(2*torch.tensor(time_step)) * normal_distribution_for_langevin.sample())
+                                                                    #- time_step * gradU(array_of_model_configurations[k-1, i])
+                                                                    + add_spin)
+                                                                    #+ torch.sqrt(2*torch.tensor(time_step)) * normal_distribution_for_langevin.sample())
 
                 proposed_model_configuration_amongst_zeros[k,i] = BC(proposed_model_configuration_amongst_zeros[k,i])
 
@@ -61,12 +68,12 @@ def NF_MCMC_algorithm(model_name, beta, U, BC, energy_parameters, flow, initial_
             array_of_model_configurations = array_of_model_configurations + proposed_model_configuration_amongst_zeros
         
         def log_rho_hat(x):
-            return base_distribution.log_prob((flow.inverse(x))[0])+flow.inverse(x)[1]
+            return base_distribution.log_prob(BC((flow.inverse(x))[0]))+flow.inverse(x)[1]
         
         #OPTIMISATION
         optimizer.zero_grad()
         x = array_of_model_configurations[k-1,:].clone().detach().requires_grad_(False)
-        loss = - (base_distribution.log_prob(flow.inverse(x)[0]) + flow.inverse(x)[1]).mean()
+        loss = - (base_distribution.log_prob(BC(flow.inverse(x)[0])) + flow.inverse(x)[1]).mean()
         loss.backward()
         optimizer.step()
     

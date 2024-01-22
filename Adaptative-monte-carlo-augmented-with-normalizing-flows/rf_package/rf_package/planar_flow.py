@@ -26,13 +26,9 @@ class PlanarFlow(nn.Module):
     def forward(self, z):
         u = self.constrained_u()
         hidden_units = torch.matmul(self.w.T, z.T) + self.b
-
         x = z + u.unsqueeze(0) * self.h(hidden_units).unsqueeze(-1)
-
         psi = self.h_prime(hidden_units).unsqueeze(0) * self.w.unsqueeze(-1)
-
         log_det = torch.log((1+torch.matmul(u.T, psi)).abs() + 1e-15)
-
         return x, log_det
 
     def inverse(self, x):
