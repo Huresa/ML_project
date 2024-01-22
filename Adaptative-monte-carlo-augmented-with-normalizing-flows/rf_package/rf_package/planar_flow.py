@@ -3,25 +3,12 @@ import torch.nn as nn
 from math import sqrt
 
 class PlanarFlow(nn.Module):
-
     def __init__(self, data_dim):
         super().__init__()
-
         self.u = nn.Parameter(torch.rand(data_dim)/sqrt(data_dim))
         self.w = nn.Parameter(torch.rand(data_dim)/sqrt(data_dim))
         self.b = nn.Parameter(torch.rand(1)/sqrt(data_dim))
         self.h = nn.Tanh()
-    
-    def h_prime(self, z):
-        return 1 - self.h(z) ** 2
-    
-    def constrained_u(self):
-        """
-        Constrain the parameters u to ensure invertibility
-        """
-        wu = torch.matmul(self.w.T, self.u)
-        m = lambda x: -1 + torch.log(1 + torch.exp(x))
-        return self.u + (m(wu) - wu) * (self.w / (torch.norm(self.w) ** 2 + 1e-15))
     
     def forward(self, z):
         u = self.constrained_u()
@@ -38,6 +25,17 @@ class PlanarFlow(nn.Module):
         psi = self.h_prime(hidden_units).unsqueeze(0) * self.w.unsqueeze(-1)
         log_det = -torch.log((1 + torch.matmul(u.T, psi)).abs() + 1e-15)
         return z, log_det
+    
+    def h_prime(self, z):
+        return 1 - self.h(z) ** 2
+    
+    def constrained_u(self):
+        """
+        Constrain the parameters u to ensure invertibility
+        """
+        wu = torch.matmul(self.w.T, self.u)
+        m = lambda x: -1 + torch.log(1 + torch.exp(x))
+        return self.u + (m(wu) - wu) * (self.w / (torch.norm(self.w) ** 2 + 1e-15))
 
 class LayeredPlanarFlow(nn.Module):
 
