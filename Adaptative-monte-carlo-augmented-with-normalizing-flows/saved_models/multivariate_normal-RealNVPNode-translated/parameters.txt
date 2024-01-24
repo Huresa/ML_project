@@ -1,0 +1,8 @@
+beta	1
+n	20
+N	2
+time_step	0.1
+k_max	200
+k_lang	200
+epsilon	0.02
+energy_parameters	[]

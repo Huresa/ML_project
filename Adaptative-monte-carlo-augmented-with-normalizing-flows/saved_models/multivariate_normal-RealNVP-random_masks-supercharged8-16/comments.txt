@@ -1,0 +1,2 @@
+hidden_size = 16
+layers = 8

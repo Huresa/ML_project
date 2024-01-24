@@ -1,0 +1,2 @@
+8 layers,
+hidden size = 16

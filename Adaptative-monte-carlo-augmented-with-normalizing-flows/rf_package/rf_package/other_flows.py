@@ -44,33 +44,6 @@ class LayeredSimpleAffine(nn.Module):
             inv_log_det_jac_sum += log_det_jac
         return y, inv_log_det_jac_sum
 
-"""
-class StackSimpleAffine(nn.Module):
-    def __init__(self, transforms, data_dim):
-        super().__init__()
-        self.dim = data_dim
-        self.transforms = nn.ModuleList(transforms)
-        self.distribution = MultivariateNormal(torch.zeros(self.dim), torch.eye(self.dim))
-
-    def log_probability(self, x):
-        log_prob = torch.zeros(x.shape[0])
-        for transform in reversed(self.transforms):
-            x, inv_log_det_jac = transform.inverse(x)
-            log_prob += inv_log_det_jac
-        log_prob += self.distribution.log_prob(x)
-
-        return log_prob
-
-    def rsample(self, num_samples):
-        x = self.distribution.sample((num_samples,))
-        log_prob = self.distribution.log_prob(x)
-
-        for transform in self.transforms:
-            x, log_det_jac = transform.forward(x)
-            log_prob += log_det_jac
-
-        return x, log_prob
-"""
 
 class RealNVPNode(nn.Module):
     def __init__(self, mask, hidden_size):
@@ -134,51 +107,6 @@ class RealNVP(nn.Module):
             inv_log_det_jac_sum += log_det_jac
         return y, inv_log_det_jac_sum
 
-
-"""
-class RealNVP(nn.Module):
-    def __init__(self, masks, hidden_size):
-        super(RealNVP, self).__init__()
-
-        self.dim = len(masks[0])
-        self.hidden_size = hidden_size
-
-        self.masks = nn.ParameterList([nn.Parameter(torch.Tensor(mask), requires_grad=False) for mask in masks])
-        self.layers = nn.ModuleList([RealNVPNode(mask, self.hidden_size) for mask in self.masks])
-
-        self.distribution = MultivariateNormal(torch.zeros(self.dim), torch.eye(self.dim))
-
-    def log_probability(self, x):
-        log_prob = torch.zeros(x.shape[0])
-        for layer in reversed(self.layers):
-            x, inv_log_det_jac = layer.inverse(x)
-            log_prob += inv_log_det_jac
-        log_prob += self.distribution.log_prob(x)
-
-        return log_prob
-
-    def rsample(self, num_samples):
-        x = self.distribution.sample((num_samples,))
-        log_prob = self.distribution.log_prob(x)
-
-        for layer in self.layers:
-            x, log_det_jac = layer.forward(x)
-            log_prob += log_det_jac
-
-        return x, log_prob
-
-    def sample_each_step(self, num_samples):
-        samples = []
-
-        x = self.distribution.sample((num_samples,))
-        samples.append(x.detach().numpy())
-
-        for layer in self.layers:
-            x, _ = layer.forward(x)
-            samples.append(x.detach().numpy())
-
-        return samples
-"""
 
 class RealNVPNodeCNN(nn.Module):
     def __init__(self, mask, in_channels):
